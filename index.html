@@ -179,6 +179,17 @@
   .prompt-text .s { color: var(--accent); }
   .prompt-text .n { color: var(--pink); }
 
+  .prompt-hint {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    min-height: 1.2em;
+  }
+
+  .prompt-hint:empty { display: none; }
+
   .prompt-placeholder {
     color: var(--text-dim);
     font-weight: 400;
@@ -344,6 +355,7 @@
     <div class="prompt-text" id="promptDisplay">
       <span class="prompt-placeholder">Hit Generate or press Space</span>
     </div>
+    <div class="prompt-hint" id="promptHint"></div>
   </div>
 
   <div class="answer-strip" id="answerStrip">
@@ -375,18 +387,18 @@ const ENHARMONIC = {'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};
 const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb','D#','G#','A#']);
 
 const SCALES = {
-  'Ionian (Major)':       [0,2,4,5,7,9,11],
-  'Dorian':               [0,2,3,5,7,9,10],
-  'Phrygian':             [0,1,3,5,7,8,10],
-  'Lydian':               [0,2,4,6,7,9,11],
-  'Mixolydian':           [0,2,4,5,7,9,10],
-  'Aeolian (Nat. Minor)': [0,2,3,5,7,8,10],
-  'Locrian':              [0,1,3,5,6,8,10],
-  'Major Pentatonic':     [0,2,4,7,9],
-  'Minor Pentatonic':     [0,3,5,7,10],
-  'Blues':                 [0,3,5,6,7,10],
-  'Harmonic Minor':       [0,2,3,5,7,8,11],
-  'Melodic Minor (asc)':  [0,2,3,5,7,9,11],
+  'Ionian (Major)':       { n: [0,2,4,5,7,9,11],  h: '1 2 3 4 5 6 7 — the reference major scale' },
+  'Dorian':               { n: [0,2,3,5,7,9,10],   h: '1 2 b3 4 5 6 b7 — minor with a natural 6' },
+  'Phrygian':             { n: [0,1,3,5,7,8,10],    h: '1 b2 b3 4 5 b6 b7 — minor with a b2' },
+  'Lydian':               { n: [0,2,4,6,7,9,11],    h: '1 2 3 #4 5 6 7 — major with a #4' },
+  'Mixolydian':           { n: [0,2,4,5,7,9,10],    h: '1 2 3 4 5 6 b7 — major with a b7' },
+  'Aeolian (Nat. Minor)': { n: [0,2,3,5,7,8,10],    h: '1 2 b3 4 5 b6 b7 — the reference minor scale' },
+  'Locrian':              { n: [0,1,3,5,6,8,10],     h: '1 b2 b3 4 b5 b6 b7 — minor with b2 and b5' },
+  'Major Pentatonic':     { n: [0,2,4,7,9],          h: '1 2 3 5 6 — major without 4 and 7' },
+  'Minor Pentatonic':     { n: [0,3,5,7,10],         h: '1 b3 4 5 b7 — minor without 2 and 6' },
+  'Blues':                 { n: [0,3,5,6,7,10],       h: '1 b3 4 b5 5 b7 — minor pentatonic + b5' },
+  'Harmonic Minor':       { n: [0,2,3,5,7,8,11],     h: '1 2 b3 4 5 b6 7 — natural minor with a raised 7' },
+  'Melodic Minor (asc)':  { n: [0,2,3,5,7,9,11],     h: '1 2 b3 4 5 6 7 — natural minor with raised 6 and 7' },
 };
 
 const INTERVAL_MAP = {
@@ -467,10 +479,11 @@ function generate() {
   curRoot = rv ? NOTES.indexOf(rv) : Math.floor(Math.random() * 12);
   const names = Object.keys(SCALES);
   curScaleName = sv || names[Math.floor(Math.random() * names.length)];
-  curScale = SCALES[curScaleName];
+  curScale = SCALES[curScaleName].n;
   const rn = noteName(curRoot, NOTES[curRoot]);
   document.getElementById('promptDisplay').innerHTML =
     `Build <span class="s">${curScaleName}</span> from <span class="n">${rn}</span>`;
+  document.getElementById('promptHint').textContent = SCALES[curScaleName].h;
   // reset answer
   revealed = false;
   document.getElementById('revealBtn').disabled = false;
