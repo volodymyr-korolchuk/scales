@@ -483,7 +483,7 @@ function generate() {
   const rn = noteName(curRoot, NOTES[curRoot]);
   document.getElementById('promptDisplay').innerHTML =
     `Build <span class="s">${curScaleName}</span> from <span class="n">${rn}</span>`;
-  document.getElementById('promptHint').textContent = SCALES[curScaleName].h;
+  document.getElementById('promptHint').textContent = '';
   // reset answer
   revealed = false;
   document.getElementById('revealBtn').disabled = false;
@@ -499,6 +499,7 @@ function reveal() {
   revealed = true;
   const btn = document.getElementById('revealBtn');
   btn.disabled = true; btn.textContent = 'Shown';
+  document.getElementById('promptHint').textContent = SCALES[curScaleName].h;
   const rootNote = NOTES[curRoot];
   const c = document.getElementById('answerNotes');
   c.innerHTML = '';
