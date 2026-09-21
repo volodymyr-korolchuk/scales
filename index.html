@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scale Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #f4f2ef;
+    --surface: #faf9f7;
+    --text: #1c1b22;
+    --text-dim: #78757f;
+    --accent: #7c5cbf;
+    --accent-hover: #694aad;
+    --pink: #c0628a;
+    --border: #ddd9d3;
+    --fretboard-bg: #2c2a33;
+    --fretboard-wood: #3a3841;
+  }
+
+  body {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .topbar-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .topbar-hint {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .topbar-hint kbd {
+    display: inline-block;
+    padding: 0.1em 0.4em;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 0.65rem;
+    margin: 0 0.1em;
+  }
+
+  /* ---- Layout ---- */
+  .main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1.25rem 1.5rem 2rem;
+  }
+
+  /* ---- Controls row ---- */
+  .controls {
+    display: flex;
+    align-items: end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .field-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0.5rem 2rem 0.5rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2378757f'/%3E%3C/svg%3E") no-repeat right 0.6rem center;
+    color: var(--text);
+    cursor: pointer;
+    min-width: 155px;
+  }
+
+  .field select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -1px;
+    border-color: transparent;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    line-height: 1.3;
+  }
+
+  .btn-go {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-go:hover { background: var(--accent-hover); }
+  .btn-go:active { transform: scale(0.97); }
+
+  .btn-reveal {
+    background: transparent;
+    color: var(--accent);
+    border-color: var(--border);
+  }
+  .btn-reveal:hover {
+    border-color: var(--accent);
+    background: rgba(124, 92, 191, 0.04);
+  }
+  .btn-reveal:disabled {
+    opacity: 0.4;
+    cursor: default;
+    border-color: var(--border);
+    background: transparent;
+  }
+
+  .controls-spacer { flex: 1; min-width: 0.5rem; }
+
+  /* ---- Prompt card ---- */
+  .prompt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.6rem 2rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .prompt-text {
+    flex: 1;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    min-width: 200px;
+    line-height: 1.35;
+  }
+
+  .prompt-text .s { color: var(--accent); }
+  .prompt-text .n { color: var(--pink); }
+
+  .prompt-placeholder {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 1rem;
+  }
+
+  /* ---- Answer strip ---- */
+  .answer-strip {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .answer-strip.open {
+    max-height: 120px;
+    opacity: 1;
+  }
+
+  .answer-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.75rem 0;
+    flex-wrap: wrap;
+  }
+
+  .note-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 6px;
+    color: #fff;
+    background: var(--pink);
+  }
+
+  .note-badge.root {
+    background: var(--accent);
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.85rem;
+    border-radius: 7px;
+  }
+
+  .note-sep {
+    color: var(--border);
+    font-size: 0.7rem;
+    margin: 0 0.05rem;
+    user-select: none;
+  }
+
+  .interval-tag {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 400;
+    opacity: 0.7;
+    margin-top: 1px;
+  }
+
+  /* ---- Fretboard ---- */
+  .fretboard-panel {
+    background: var(--fretboard-bg);
+    border-radius: 10px;
+    padding: 1rem 1rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .fretboard-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .fretboard-toolbar-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .caged-group {
+    display: flex;
+    gap: 2px;
+  }
+
+  .caged-btn {
+    padding: 0.3rem 0.7rem;
+    border: none;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.45);
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .caged-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+  }
+
+  .caged-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .fretboard-scroll {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+  .fretboard-scroll::-webkit-scrollbar { height: 4px; }
+  .fretboard-scroll::-webkit-scrollbar-track { background: transparent; }
+  .fretboard-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+  .fretboard-container { min-width: 920px; }
+
+  svg.fretboard { width: 100%; height: auto; display: block; }
+
+  @media (max-width: 640px) {
+    .main { padding: 0.75rem 0.75rem 1.5rem; }
+    .prompt-card { padding: 1.1rem 1.25rem; }
+    .prompt-text { font-size: 1.1rem; }
+    .controls { gap: 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">Scale Practice</div>
+  <div class="topbar-hint"><kbd>Space</kbd> generate &nbsp; <kbd>R</kbd> reveal</div>
+</div>
+
+<div class="main">
+
+  <div class="controls">
+    <div class="field">
+      <span class="field-label">Root</span>
+      <select id="rootSelect"><option value="">Random</option></select>
+    </div>
+    <div class="field">
+      <span class="field-label">Scale / Mode</span>
+      <select id="scaleSelect"><option value="">Random</option></select>
+    </div>
+    <button class="btn btn-go" id="generateBtn">Generate</button>
+    <div class="controls-spacer"></div>
+    <button class="btn btn-reveal" id="revealBtn" disabled>Reveal</button>
+  </div>
+
+  <div class="prompt-card">
+    <div class="prompt-text" id="promptDisplay">
+      <span class="prompt-placeholder">Hit Generate or press Space</span>
+    </div>
+  </div>
+
+  <div class="answer-strip" id="answerStrip">
+    <div class="answer-inner" id="answerNotes"></div>
+  </div>
+
+  <div class="fretboard-panel">
+    <div class="fretboard-toolbar">
+      <span class="fretboard-toolbar-label">Fretboard</span>
+      <div class="caged-group" id="cagedBtns">
+        <button class="caged-btn active" data-pos="all">ALL</button>
+        <button class="caged-btn" data-pos="C">C</button>
+        <button class="caged-btn" data-pos="A">A</button>
+        <button class="caged-btn" data-pos="G">G</button>
+        <button class="caged-btn" data-pos="E">E</button>
+        <button class="caged-btn" data-pos="D">D</button>
+      </div>
+    </div>
+    <div class="fretboard-scroll">
+      <div class="fretboard-container" id="fretboardContainer"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const ENHARMONIC = {'C#':'Db','D#':'Eb','F#':'Gb','G#':'Ab','A#':'Bb'};
+const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb','D#','G#','A#']);
+
+const SCALES = {
+  'Ionian (Major)':       [0,2,4,5,7,9,11],
+  'Dorian':               [0,2,3,5,7,9,10],
+  'Phrygian':             [0,1,3,5,7,8,10],
+  'Lydian':               [0,2,4,6,7,9,11],
+  'Mixolydian':           [0,2,4,5,7,9,10],
+  'Aeolian (Nat. Minor)': [0,2,3,5,7,8,10],
+  'Locrian':              [0,1,3,5,6,8,10],
+  'Major Pentatonic':     [0,2,4,7,9],
+  'Minor Pentatonic':     [0,3,5,7,10],
+  'Blues':                 [0,3,5,6,7,10],
+  'Harmonic Minor':       [0,2,3,5,7,8,11],
+  'Melodic Minor (asc)':  [0,2,3,5,7,9,11],
+};
+
+const INTERVAL_MAP = {
+  0:'R', 1:'b2', 2:'2', 3:'b3', 4:'3', 5:'4', 6:'b5',
+  7:'5', 8:'b6', 9:'6', 10:'b7', 11:'7'
+};
+
+const TUNING = [40, 45, 50, 55, 59, 64];
+const STRING_LABELS = ['E','A','D','G','B','e'];
+const NUM_FRETS = 24;
+
+// ---- state ----
+let curRoot = null, curScale = null, curScaleName = null, curPos = 'all', revealed = false;
+
+// ---- helpers ----
+function noteName(idx, rootNote) {
+  const n = NOTES[idx % 12];
+  const useFlats = FLAT_KEYS.has(rootNote) || FLAT_KEYS.has(ENHARMONIC[rootNote]);
+  return (useFlats && ENHARMONIC[n]) ? ENHARMONIC[n] : n;
+}
+
+function getCAGED(rootIndex) {
+  // Root fret on the low E string
+  const lowEopen = TUNING[0] % 12; // 4 = E
+  let rFret = (rootIndex - lowEopen + 12) % 12;
+  if (rFret === 0) rFret = 12;
+
+  // Offsets from root-on-low-E for each CAGED shape.
+  // Order going UP the neck: E → D → C → A → G → E(+12)
+  // Spacing between shape roots: +3, +2, +3, +2, +2 = 12
+  const offsets = {
+    'E': [-1,  3],
+    'D': [ 2,  5],
+    'C': [ 4,  8],
+    'A': [ 7, 10],
+    'G': [ 9, 12]
+  };
+
+  // Compute all instances of each shape that fit on 0..NUM_FRETS
+  // (each shape repeats every 12 frets)
+  const p = {};
+  for (const [shape, [lo, hi]] of Object.entries(offsets)) {
+    const windows = [];
+    for (const base of [rFret - 12, rFret, rFret + 12]) {
+      let s = base + lo;
+      let e = base + hi;
+      // keep windows that overlap with 0..NUM_FRETS
+      if (e >= 0 && s <= NUM_FRETS) {
+        windows.push({ s: Math.max(0, s), e: Math.min(NUM_FRETS, e) });
+      }
+    }
+    p[shape] = windows;
+  }
+  return p;
+}
+
+// ---- selectors ----
+function populateSelectors() {
+  const rs = document.getElementById('rootSelect');
+  const ss = document.getElementById('scaleSelect');
+  NOTES.forEach(n => {
+    const o = document.createElement('option');
+    o.value = n;
+    o.textContent = ENHARMONIC[n] ? `${n} / ${ENHARMONIC[n]}` : n;
+    rs.appendChild(o);
+  });
+  Object.keys(SCALES).forEach(name => {
+    const o = document.createElement('option');
+    o.value = name; o.textContent = name;
+    ss.appendChild(o);
+  });
+}
+
+// ---- generate ----
+function generate() {
+  const rv = document.getElementById('rootSelect').value;
+  const sv = document.getElementById('scaleSelect').value;
+  curRoot = rv ? NOTES.indexOf(rv) : Math.floor(Math.random() * 12);
+  const names = Object.keys(SCALES);
+  curScaleName = sv || names[Math.floor(Math.random() * names.length)];
+  curScale = SCALES[curScaleName];
+  const rn = noteName(curRoot, NOTES[curRoot]);
+  document.getElementById('promptDisplay').innerHTML =
+    `Build <span class="s">${curScaleName}</span> from <span class="n">${rn}</span>`;
+  // reset answer
+  revealed = false;
+  document.getElementById('revealBtn').disabled = false;
+  document.getElementById('revealBtn').textContent = 'Reveal';
+  document.getElementById('answerStrip').classList.remove('open');
+  document.getElementById('answerNotes').innerHTML = '';
+  renderFretboard();
+}
+
+// ---- reveal ----
+function reveal() {
+  if (!curScale) return;
+  revealed = true;
+  const btn = document.getElementById('revealBtn');
+  btn.disabled = true; btn.textContent = 'Shown';
+  const rootNote = NOTES[curRoot];
+  const c = document.getElementById('answerNotes');
+  c.innerHTML = '';
+
+  curScale.forEach((interval, i) => {
+    if (i > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'note-sep';
+      sep.textContent = '\u2013';
+      c.appendChild(sep);
+    }
+    const noteIdx = (curRoot + interval) % 12;
+    const badge = document.createElement('span');
+    badge.className = 'note-badge' + (i === 0 ? ' root' : '');
+    badge.innerHTML = noteName(noteIdx, rootNote) +
+      `<span class="interval-tag">${INTERVAL_MAP[interval]}</span>`;
+    c.appendChild(badge);
+  });
+
+  // octave root
+  const sep = document.createElement('span');
+  sep.className = 'note-sep'; sep.textContent = '\u2013'; c.appendChild(sep);
+  const oct = document.createElement('span');
+  oct.className = 'note-badge root';
+  oct.innerHTML = noteName(curRoot, rootNote) + `<span class="interval-tag">R</span>`;
+  c.appendChild(oct);
+
+  document.getElementById('answerStrip').classList.add('open');
+  renderFretboard();
+}
+
+// ---- fretboard ----
+function renderFretboard() {
+  const container = document.getElementById('fretboardContainer');
+  const mL = 40, mR = 16, mT = 28, mB = 30, fW = 62, sH = 32;
+  const tW = mL + (NUM_FRETS + 1) * fW + mR;
+  const tH = mT + 5 * sH + mB;
+
+  const scaleNotes = curScale ? new Set(curScale.map(i => (curRoot + i) % 12)) : new Set();
+  const caged = curScale ? getCAGED(curRoot) : {};
+  const rootNote = curScale ? NOTES[curRoot] : 'C';
+
+  let svg = `<svg class="fretboard" viewBox="0 0 ${tW} ${tH}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // bg
+  svg += `<rect width="${tW}" height="${tH}" fill="${getComputedStyle(document.documentElement).getPropertyValue('--fretboard-bg').trim()}" rx="6"/>`;
+
+  // fretboard surface
+  const fbY = mT - 7, fbH = 5 * sH + 14;
+  svg += `<rect x="${mL}" y="${fbY}" width="${(NUM_FRETS+1)*fW}" height="${fbH}" fill="var(--fretboard-wood)" rx="3"/>`;
+
+  // CAGED highlight
+  if (curPos !== 'all' && caged[curPos]) {
+    for (const w of caged[curPos]) {
+      const hx = mL + w.s * fW - fW/2;
+      const hw = (w.e - w.s + 1) * fW;
+      svg += `<rect x="${Math.max(hx, mL)}" y="${fbY}" width="${hw}" height="${fbH}" fill="rgba(124,92,191,0.12)" rx="3"/>`;
+    }
+  }
+
+  // nut
+  svg += `<rect x="${mL - 1}" y="${fbY}" width="3" height="${fbH}" fill="#e8e4df" rx="1"/>`;
+
+  // fret markers
+  const markers = [3,5,7,9,12,15,17,19,21,24];
+  markers.forEach(f => {
+    const x = mL + f * fW - fW / 2;
+    if (f === 12 || f === 24) {
+      svg += `<circle cx="${x}" cy="${mT + 1.5*sH}" r="4.5" fill="rgba(255,255,255,0.06)"/>`;
+      svg += `<circle cx="${x}" cy="${mT + 3.5*sH}" r="4.5" fill="rgba(255,255,255,0.06)"/>`;
+    } else {
+      svg += `<circle cx="${x}" cy="${mT + 2.5*sH}" r="4.5" fill="rgba(255,255,255,0.06)"/>`;
+    }
+  });
+
+  // fret wires
+  for (let f = 1; f <= NUM_FRETS; f++) {
+    const x = mL + f * fW;
+    svg += `<line x1="${x}" y1="${fbY+1}" x2="${x}" y2="${fbY+fbH-1}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>`;
+  }
+
+  // strings
+  for (let s = 0; s < 6; s++) {
+    const y = mT + s * sH;
+    const t = 0.6 + (5 - s) * 0.2;
+    svg += `<line x1="${mL}" y1="${y}" x2="${mL+(NUM_FRETS+1)*fW}" y2="${y}" stroke="rgba(255,255,255,0.22)" stroke-width="${t}"/>`;
+  }
+
+  // fret numbers
+  for (let f = 1; f <= NUM_FRETS; f++) {
+    const x = mL + f * fW - fW / 2;
+    svg += `<text x="${x}" y="${mT + 5*sH + 22}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)" font-family="JetBrains Mono, monospace">${f}</text>`;
+  }
+
+  // string labels
+  for (let s = 0; s < 6; s++) {
+    const y = mT + s * sH;
+    svg += `<text x="${mL - 16}" y="${y + 4}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.25)" font-family="JetBrains Mono, monospace">${STRING_LABELS[5 - s]}</text>`;
+  }
+
+  // notes (only after reveal)
+  if (curScale && revealed) {
+    for (let s = 0; s < 6; s++) {
+      const dRow = 5 - s;
+      const open = TUNING[s] % 12;
+      for (let f = 0; f <= NUM_FRETS; f++) {
+        const nIdx = (open + f) % 12;
+        if (!scaleNotes.has(nIdx)) continue;
+        if (curPos !== 'all') {
+          const wins = caged[curPos];
+          if (!wins || !wins.some(w => f >= w.s && f <= w.e)) continue;
+        }
+        const isRoot = nIdx === curRoot;
+        const cx = f === 0 ? mL - 1 : mL + f * fW - fW / 2;
+        const cy = mT + dRow * sH;
+        const r = isRoot ? 12 : 10;
+        const fill = isRoot ? '#7c5cbf' : '#c0628a';
+        const name = noteName(nIdx, rootNote);
+
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${isRoot ? '#9d83d4' : '#d48aab'}" stroke-width="1.5"/>`;
+        svg += `<text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="${isRoot ? 10 : 8.5}" fill="#fff" font-family="JetBrains Mono, monospace" font-weight="500">${name}</text>`;
+      }
+    }
+  } else {
+    svg += `<text x="${tW/2}" y="${tH/2 + 2}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.15)" font-family="Space Grotesk, sans-serif">generate a scale</text>`;
+  }
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+}
+
+// ---- CAGED buttons ----
+document.querySelectorAll('#cagedBtns .caged-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#cagedBtns .caged-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    curPos = btn.dataset.pos;
+    renderFretboard();
+  });
+});
+
+// ---- keyboard ----
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'SELECT') return;
+  if (e.code === 'Space' || e.code === 'KeyG') { e.preventDefault(); generate(); }
+  if (e.code === 'KeyR' || e.code === 'Enter') { e.preventDefault(); reveal(); }
+});
+
+// ---- init ----
+document.getElementById('generateBtn').addEventListener('click', generate);
+document.getElementById('revealBtn').addEventListener('click', reveal);
+populateSelectors();
+renderFretboard();
+</script>
+
+</body>
+</html>
